@@ -1,4 +1,5 @@
 import tensorflow as tf
+import random
 
 AUTO = tf.data.experimental.AUTOTUNE
 
