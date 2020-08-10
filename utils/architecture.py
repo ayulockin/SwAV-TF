@@ -25,7 +25,7 @@ def get_projection_prototype(prototype_dimension):
 
 	projection_2_normalize = tf.math.l2_normalize(projection_2, axis=1, name='projection')
 
-	prototype = Dense(prototype_dimension, use_bias=False, name='prototype')(projection_2_normalize)
+	prototype = layers.Dense(prototype_dimension, use_bias=False, name='prototype')(projection_2_normalize)
 
 	return models.Model(inputs=inputs,
 		outputs=[projection_2_normalize, prototype])
