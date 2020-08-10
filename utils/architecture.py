@@ -15,7 +15,7 @@ def get_resnet_backbone():
 
     return backbone
 
-def get_projection_prototype():
+def get_projection_prototype(prototype_dimension):
 	inputs = layers.Input((2048, ))
 	projection_1 = layers.Dense(2048)(inputs)
 	projection_1 = layers.BatchNormalization()(projection_1)
@@ -23,9 +23,9 @@ def get_projection_prototype():
 
 	projection_2 = layers.Dense(128)(projection_1)
 
-	projection_2_normalize = tf.math.l2_normalize(projection_2, axis=1)
+	projection_2_normalize = tf.math.l2_normalize(projection_2, axis=1, name='projection')
 
-	prototype = layers.Dense(3000, use_bias=False)(projection_2_normalize)
+	prototype = Dense(prototype_dimension, use_bias=False, name='prototype')(projection_2_normalize)
 
 	return models.Model(inputs=inputs,
 		outputs=[projection_2_normalize, prototype])
