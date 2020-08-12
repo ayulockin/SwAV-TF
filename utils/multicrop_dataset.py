@@ -102,7 +102,7 @@ def tie_together(image, label, min_scale, max_scale, crop_size):
     # Color distortions
     image, label = custom_augment(image, label)
 
-    return distored_image, label
+    return image, label
 
 def get_multires_dataset(dataset,
 	size_crops,
