@@ -48,25 +48,6 @@ def color_drop(x):
     return x
 
 @tf.function
-def random_resize_crop(image, label, min_scale, max_scale, crop_size):
-	# conditional resizing
-    if crop_size == 224:
-        image_shape = 260
-        image = tf.image.resize(image, (image_shape, image_shape))
-    else:
-        image_shape = 160
-        image = tf.image.resize(image, (image_shape, image_shape))
-    # get the crop size for given min and max scale
-    size = tf.random.uniform(shape=(1,), minval=min_scale*image_shape,
-    	maxval=max_scale*image_shape, dtype=tf.float32)
-    size = tf.cast(size, tf.int32)[0]
-    # get the crop from the image
-    crop = tf.image.random_crop(image, (size,size,3))
-    crop_resize = tf.image.resize(crop, (crop_size, crop_size))
-
-    return crop_resize, label
-
-@tf.function
 def custom_augment(image, label):
     # Random flips
     image = random_apply(tf.image.flip_left_right, image, p=0.5)
@@ -79,6 +60,24 @@ def custom_augment(image, label):
 
     return (image, label)
 
+@tf.function
+def random_resize_crop(image, label, min_scale, max_scale, crop_size):
+	# Conditional resizing
+    if crop_size == 224:
+        image_shape = 260
+        image = tf.image.resize(image, (image_shape, image_shape))
+    else:
+        image_shape = 160
+        image = tf.image.resize(image, (image_shape, image_shape))
+    # Get the crop size for given min and max scale
+    size = tf.random.uniform(shape=(1,), minval=min_scale*image_shape,
+    	maxval=max_scale*image_shape, dtype=tf.float32)
+    size = tf.cast(size, tf.int32)[0]
+    # Get the crop from the image
+    crop = tf.image.random_crop(image, (size,size,3))
+    crop_resize = tf.image.resize(crop, (crop_size, crop_size))
+
+    return crop_resize, label
 
 @tf.function
 def random_apply(func, x, p):
@@ -93,6 +92,18 @@ def scale_image(image, label):
     image = tf.image.convert_image_dtype(image, tf.float32)
     return (image, label)
 
+@tf.function
+def tie_together(image, label, min_scale, max_scale, crop_size):
+    # Scale the pixel values
+    image, label = scale_image(image , label)
+    # Random resized crops
+    image, label = random_resize_crop(image, label, min_scale,
+    	max_scale, crop_size)
+    # Color distortions
+    image, label = custom_augment(image, label)
+
+    return distored_image, label
+
 def get_multires_dataset(dataset,
 	size_crops,
 	num_crops,
@@ -104,11 +115,9 @@ def get_multires_dataset(dataset,
 		for _ in range(num_crop):
 			loader = (
 					dataset
-					.map(scale_image, num_parallel_calls=AUTO)
 					.shuffle(1024)
-					.map(lambda x, y: random_resize_crop(x, y, min_scale[i],
+					.map(lambda x, y: tie_together(x, y, min_scale[i],
 					 	max_scale[i], size_crops[i]), num_parallel_calls=AUTO)
-					.map(custom_augment, num_parallel_calls=AUTO)
 				)
 			if options!=None:
 				loader = loader.with_options(options)
