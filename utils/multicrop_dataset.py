@@ -48,16 +48,15 @@ def color_drop(x):
 	return x
 
 @tf.function
-def custom_augment(image, label, use_color_distortion):
+def custom_augment(image, label):
 	# Random flips
 	image = random_apply(tf.image.flip_left_right, image, p=0.5)
-	if use_color_distortion:
-		# Randomly apply gausian blur
-		image = random_apply(gaussian_blur, image, p=0.5)
-		# Randomly apply transformation (color distortions) with probability p.
-		image = random_apply(color_jitter, image, p=0.8)
-		# Randomly apply grayscale
-		image = random_apply(color_drop, image, p=0.2)
+	# Randomly apply gausian blur
+	image = random_apply(gaussian_blur, image, p=0.5)
+	# Randomly apply transformation (color distortions) with probability p.
+	image = random_apply(color_jitter, image, p=0.8)
+	# Randomly apply grayscale
+	image = random_apply(color_drop, image, p=0.2)
 
 	return (image, label)
 
@@ -94,14 +93,14 @@ def scale_image(image, label):
 	return (image, label)
 
 @tf.function
-def tie_together(image, label, min_scale, max_scale, crop_size, use_color_distortion):
+def tie_together(image, label, min_scale, max_scale, crop_size):
 	# Scale the pixel values
 	image, label = scale_image(image , label)
 	# Random resized crops
 	image, label = random_resize_crop(image, label, min_scale,
 		max_scale, crop_size)
 	# Color distortions
-	image, label = custom_augment(image, label, use_color_distortion)
+	image, label = custom_augment(image, label)
 
 	return image, label
 
@@ -110,7 +109,6 @@ def get_multires_dataset(dataset,
 	num_crops,
 	min_scale,
 	max_scale,
-	use_color_distortion=True,
 	options=None):
 	loaders = tuple()
 	for i, num_crop in enumerate(num_crops):
@@ -119,7 +117,7 @@ def get_multires_dataset(dataset,
 					dataset
 					.shuffle(1024)
 					.map(lambda x, y: tie_together(x, y, min_scale[i],
-						max_scale[i], size_crops[i], use_color_distortion), num_parallel_calls=AUTO)
+						max_scale[i], size_crops[i]), num_parallel_calls=AUTO)
 				)
 			if options!=None:
 				loader = loader.with_options(options)
