@@ -48,7 +48,7 @@ def color_drop(x):
 	return x
 
 @tf.function
-def custom_augment(image, label):
+def custom_augment(image):
 	# Random flips
 	image = random_apply(tf.image.flip_left_right, image, p=0.5)
 	# Randomly apply gausian blur
@@ -58,10 +58,10 @@ def custom_augment(image, label):
 	# Randomly apply grayscale
 	image = random_apply(color_drop, image, p=0.2)
 
-	return (image, label)
+	return image
 
 @tf.function
-def random_resize_crop(image, label, min_scale, max_scale, crop_size):
+def random_resize_crop(image, min_scale, max_scale, crop_size):
 	# Conditional resizing
 	if crop_size == 224:
 		image_shape = 260
@@ -77,7 +77,7 @@ def random_resize_crop(image, label, min_scale, max_scale, crop_size):
 	crop = tf.image.random_crop(image, (size,size,3))
 	crop_resize = tf.image.resize(crop, (crop_size, crop_size))
 
-	return crop_resize, label
+	return crop_resize
 
 @tf.function
 def random_apply(func, x, p):
@@ -88,21 +88,23 @@ def random_apply(func, x, p):
 		lambda: x)
 
 @tf.function
-def scale_image(image, label):
+def scale_image(image):
 	image = tf.image.convert_image_dtype(image, tf.float32)
-	return (image, label)
+	return image
 
 @tf.function
-def tie_together(image, label, min_scale, max_scale, crop_size):
+def tie_together(image, min_scale, max_scale, crop_size):
+	# Retrieve the image features
+	image = image['image']
 	# Scale the pixel values
-	image, label = scale_image(image , label)
+	image = scale_image(image)
 	# Random resized crops
-	image, label = random_resize_crop(image, label, min_scale,
+	image = random_resize_crop(image, min_scale,
 		max_scale, crop_size)
-	# Color distortions
-	image, label = custom_augment(image, label)
+	# Color distortions & Gaussian blur
+	image = custom_augment(image)
 
-	return image, label
+	return image
 
 def get_multires_dataset(dataset,
 	size_crops,
@@ -116,7 +118,7 @@ def get_multires_dataset(dataset,
 			loader = (
 					dataset
 					.shuffle(1024)
-					.map(lambda x, y: tie_together(x, y, min_scale[i],
+					.map(lambda x: tie_together(x, min_scale[i],
 						max_scale[i], size_crops[i]), num_parallel_calls=AUTO)
 				)
 			if options!=None:
