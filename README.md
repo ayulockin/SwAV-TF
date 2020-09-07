@@ -4,7 +4,7 @@ By: [Ayush Thakur](https://twitter.com/ayushthakur0) and [Sayak Paul](https://tw
 
 TensorFlow 2 implementation of [Unsupervised Learning of Visual Features by Contrasting Cluster Assignments](https://arxiv.org/abs/2006.09882) by Mathilde Caron, Ishan Misra, Julien Mairal, Priya Goyal, Piotr Bojanowski, Armand Joulin.
 
-To know more about SwAV and the experiments we performed with it you can check out our blog post [here](https://app.wandb.ai/authors/swav-tf/reports/Unsupervised-visual-representation-learning-with-SwAV--VmlldzoyMjg3Mzg). Our blog post is structured in the following way - 
+To know more about SwAV and the experiments we performed with it you can check out our blog post [Unsupervised Visual Representation Learning with SwAV](https://app.wandb.ai/authors/swav-tf/reports/Unsupervised-visual-representation-learning-with-SwAV--VmlldzoyMjg3Mzg). Our blog post is structured in the following way - 
 
 - Common problems in existing self-supervised methods (for visual representation learning)
 - SwAV at a high-level
