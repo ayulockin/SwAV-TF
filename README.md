@@ -20,7 +20,7 @@ To know more about SwAV and the experiments we performed with it you can check o
 Available [here](https://github.com/ayulockin/SwAV-TF/releases/tag/v0.1.0). 
 
 ## Results
-Results of all our experiments are available as a [`wandb` dashboard](https://app.wandb.ai/authors/swav-tf). 
+Results of all our experiments are available as a [`wandb` dashboard](https://app.wandb.ai/authors/swav-tf). [![Explore-in W&B](https://img.shields.io/badge/Explore--in-W%26B-%23FFBE00)](https://app.wandb.ai/authors/swav-tf) 
 
 ## Acknowledgements
 Thanks to Mathilde Caron for providing insightful pointers that helped us minimally implement SwAV.
